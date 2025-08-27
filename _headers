@@ -1,0 +1,16 @@
+
+/areas/*.pmtiles
+  Content-Type: application/octet-stream
+  Access-Control-Allow-Origin: *
+  Cache-Control: public, max-age=31536000, immutable
+
+/bathy/*.pmtiles
+  Content-Type: application/octet-stream
+  Access-Control-Allow-Origin: *
+  Cache-Control: public, max-age=31536000, immutable
+
+/limits/*.pmtiles
+  Content-Type: application/octet-stream
+  Access-Control-Allow-Origin: *
+  Cache-Control: public, max-age=31536000, immutable
+
