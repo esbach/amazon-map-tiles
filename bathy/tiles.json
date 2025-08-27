@@ -1,0 +1,18 @@
+{
+  "tilejson": "2.2.0",
+  "name": "bathy",
+  "format": "pbf",
+  "scheme": "xyz",
+  "tiles": "https://amazonmap.netlify.app/bathy/{z}/{x}/{y}.pbf",
+  "minzoom": 0,
+  "maxzoom": 6,
+  "vector_layers": [
+    {
+      "id": "bathy",
+      "fields": {
+        "depth_m": "Number"
+      }
+    }
+  ],
+  "attribution": "Natural Earth"
+}
