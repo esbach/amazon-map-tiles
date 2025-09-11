@@ -3,8 +3,8 @@
       <Title>colored_rgba_cog.tif</Title>
       <Abstract></Abstract>
       <SRS>EPSG:3857</SRS>
-      <BoundingBox minx="-78.49999975501167" miny="-2.50001324311651" maxx="-75.50010777783000" maxy="1.00009440581027"/>
-      <Origin x="-78.49999975501167" y="-2.50001324311651"/>
+      <BoundingBox minx="-79.61732430539953" miny="-5.19844673967820" maxx="-75.02630800859927" maxy="1.72476534550949"/>
+      <Origin x="-79.61732430539953" y="-5.19844673967820"/>
       <TileFormat width="256" height="256" mime-type="image/png" extension="png"/>
       <TileSets profile="mercator">
         <TileSet href="0" units-per-pixel="156543.03390000000945" order="0"/>
