@@ -8,4 +8,8 @@
   Content-Type: application/octet-stream
   Access-Control-Allow-Origin: *
   Cache-Control: public, max-age=31536000, immutable
+  
+/landcover/*
+  Access-Control-Allow-Origin: *
+  Cache-Control: public, max-age=31536000, immutable
 
