@@ -57,5 +57,5 @@ jobs:
 
           git add areas/areas.geojson areas/areas.pmtiles
 
-          git commit -m "Update areas tiles from Supabase [skip ci]" || exit 0
+          git commit -m "Update areas tiles from Supabase ($(date -u +"%Y-%m-%dT%H:%M:%SZ"))" || exit 0
           git push
