@@ -3,7 +3,7 @@ set -euo pipefail
 
 INPUT="data/areas_base.geojson"
 OUTPUT_DIR="areas"
-OUTPUT_PM="areas/areas.pmtiles"
+OUTPUT_PM="${OUTPUT_DIR}/areas.pmtiles"
 
 mkdir -p "$OUTPUT_DIR"
 
@@ -13,11 +13,14 @@ if [ ! -f "$INPUT" ]; then
 fi
 
 tippecanoe \
-  -zg \
   -o "$OUTPUT_PM" \
-  -l areas_base \
-  --generate-ids \
+  -l polygons \
   --force \
+  -zg \
+  --use-attribute-for-id=id \
+  --include=id \
+  --include=area_type \
+  --include=area_class \
   "$INPUT"
 
 echo "Tiles written to $OUTPUT_PM"
