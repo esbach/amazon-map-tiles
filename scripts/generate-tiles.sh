@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-INPUT="data/areas_base.geojson"
+# Input and output paths
+INPUT="areas/areas.geojson"
 OUTPUT_DIR="areas"
 OUTPUT_PM="${OUTPUT_DIR}/areas.pmtiles"
 
@@ -12,6 +13,7 @@ if [ ! -f "$INPUT" ]; then
   exit 1
 fi
 
+# Tippecanoe flags mirroring your R script (except output name)
 tippecanoe \
   -o "$OUTPUT_PM" \
   -l polygons \
@@ -20,7 +22,6 @@ tippecanoe \
   --use-attribute-for-id=id \
   --include=id \
   --include=area_type \
-  --include=area_class \
   "$INPUT"
 
 echo "Tiles written to $OUTPUT_PM"
