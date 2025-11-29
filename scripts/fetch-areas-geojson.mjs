@@ -1,4 +1,3 @@
-// scripts/fetch-areas-geojson.mjs
 import { createClient } from '@supabase/supabase-js';
 import fs from 'fs/promises';
 
@@ -7,13 +6,13 @@ const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 const table = process.env.SUPABASE_TABLE || 'areas_base_geojson';
 
 if (!supabaseUrl || !supabaseKey) {
-  console.error('SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY missing');
+  console.error('Missing SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY');
   process.exit(1);
 }
 
 const supabase = createClient(supabaseUrl, supabaseKey);
 
-// Match the view you created: areas_base_geojson
+// Match columns in areas_base_geojson view
 const { data, error } = await supabase
   .from(table)
   .select('id, area_class, area_type, name, geometry_geojson');
@@ -39,11 +38,12 @@ const featureCollection = {
   features
 };
 
-await fs.mkdir('data', { recursive: true });
+// 🔹 Write exactly here: areas/areas.geojson
+await fs.mkdir('areas', { recursive: true });
 await fs.writeFile(
-  'data/areas_base.geojson',
+  'areas/areas.geojson',
   JSON.stringify(featureCollection),
   'utf8'
 );
 
-console.log(`Wrote ${features.length} features to data/areas_base.geojson`);
+console.log(`Wrote ${features.length} features to areas/areas.geojson`);
