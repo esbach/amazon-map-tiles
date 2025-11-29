@@ -12,17 +12,40 @@ if (!supabaseUrl || !supabaseKey) {
 
 const supabase = createClient(supabaseUrl, supabaseKey);
 
-// Match columns in areas_base_geojson view
-const { data, error } = await supabase
-  .from(table)
-  .select('id, area_class, area_type, name, geometry_geojson');
+// We will fetch in pages of 1000 rows
+const pageSize = 1000;
+let from = 0;
+let allRows = [];
 
-if (error) {
-  console.error('Error querying Supabase:', error);
-  process.exit(1);
+while (true) {
+  const to = from + pageSize - 1;
+
+  const { data, error } = await supabase
+    .from(table)
+    .select('id, area_class, area_type, name, geometry_geojson')
+    .range(from, to);
+
+  if (error) {
+    console.error('Error querying Supabase:', error);
+    process.exit(1);
+  }
+
+  if (!data || data.length === 0) {
+    break; // no more rows
+  }
+
+  allRows.push(...data);
+
+  if (data.length < pageSize) {
+    break; // last page
+  }
+
+  from += pageSize;
 }
 
-const features = (data || []).map(row => ({
+console.log(`Fetched ${allRows.length} rows from Supabase`);
+
+const features = allRows.map(row => ({
   type: 'Feature',
   geometry: row.geometry_geojson,
   properties: {
@@ -38,7 +61,7 @@ const featureCollection = {
   features
 };
 
-// 🔹 Write exactly here: areas/areas.geojson
+// Write to areas/areas.geojson (as before)
 await fs.mkdir('areas', { recursive: true });
 await fs.writeFile(
   'areas/areas.geojson',
