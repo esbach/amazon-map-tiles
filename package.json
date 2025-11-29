@@ -7,6 +7,6 @@
     "build-tiles": "bash scripts/generate-tiles.sh"
   },
   "dependencies": {
-    "@supabase/supabase-js": "^2.48.0"
+    "@supabase/supabase-js": "^2.86.0"
   }
 }
