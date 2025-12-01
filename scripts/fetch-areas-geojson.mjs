@@ -12,7 +12,7 @@ if (!supabaseUrl || !supabaseKey) {
 
 const supabase = createClient(supabaseUrl, supabaseKey);
 
-// We will fetch in pages of 1000 rows
+// Fetch in pages of 1000 rows with a stable order
 const pageSize = 1000;
 let from = 0;
 let allRows = [];
@@ -23,6 +23,7 @@ while (true) {
   const { data, error } = await supabase
     .from(table)
     .select('id, area_class, area_type, name, geometry_geojson')
+    .order('id', { ascending: true })   // 🔹 ensure stable ordering
     .range(from, to);
 
   if (error) {
@@ -43,9 +44,17 @@ while (true) {
   from += pageSize;
 }
 
-console.log(`Fetched ${allRows.length} rows from Supabase`);
+// 🔹 Deduplicate by id just in case
+const byId = new Map();
+for (const row of allRows) {
+  if (row.id == null) continue;
+  byId.set(row.id, row);
+}
+const dedupedRows = Array.from(byId.values());
 
-const features = allRows.map(row => ({
+console.log(`Fetched ${allRows.length} rows, ${dedupedRows.length} unique ids from Supabase`);
+
+const features = dedupedRows.map(row => ({
   type: 'Feature',
   geometry: row.geometry_geojson,
   properties: {
@@ -61,7 +70,7 @@ const featureCollection = {
   features
 };
 
-// Write to areas/areas.geojson (as before)
+// Write to areas/areas.geojson
 await fs.mkdir('areas', { recursive: true });
 await fs.writeFile(
   'areas/areas.geojson',
