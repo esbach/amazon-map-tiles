@@ -22,8 +22,8 @@ while (true) {
 
   const { data, error } = await supabase
     .from(table)
-    .select('id, area_class, area_type, name, geometry_geojson')
-    .order('id', { ascending: true })   // 🔹 ensure stable ordering
+    .select('id, properties, geometry_geojson')
+    .order('id', { ascending: true })
     .range(from, to);
 
   if (error) {
@@ -54,16 +54,19 @@ const dedupedRows = Array.from(byId.values());
 
 console.log(`Fetched ${allRows.length} rows, ${dedupedRows.length} unique ids from Supabase`);
 
-const features = dedupedRows.map(row => ({
-  type: 'Feature',
-  geometry: row.geometry_geojson,
-  properties: {
-    id: row.id,
-    area_class: row.area_class,
-    area_type: row.area_type,
-    name: row.name
-  }
-}));
+const features = dedupedRows.map(row => {
+  const p = row.properties || {};
+  return {
+    type: 'Feature',
+    geometry: row.geometry_geojson,
+    properties: {
+      id: row.id,
+      area_class: p.area_class ?? null,
+      area_type: p.area_type ?? null,
+      name: p.name ?? null
+    }
+  };
+});
 
 const featureCollection = {
   type: 'FeatureCollection',
