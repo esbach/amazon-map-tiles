@@ -2,12 +2,12 @@
 /areas/*.pmtiles
   Content-Type: application/octet-stream
   Access-Control-Allow-Origin: *
-  Cache-Control: public, max-age=31536000, immutable
+  Cache-Control: public, max-age=0, must-revalidate
 
 /limits/*.pmtiles
   Content-Type: application/octet-stream
   Access-Control-Allow-Origin: *
-  Cache-Control: public, max-age=31536000, immutable
+  Cache-Control: public, max-age=0, must-revalidate
   
 # Enable CORS for all tile files in ecuador_v1
 /ecuador/*
@@ -43,4 +43,3 @@
   X-XSS-Protection: 1; mode=block
   X-Content-Type-Options: nosniff
   Referrer-Policy: strict-origin-when-cross-origin
-
