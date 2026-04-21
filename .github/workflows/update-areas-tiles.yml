@@ -3,7 +3,8 @@ name: Update areas tiles from Supabase
 on:
   # run once per day at 08:00 UTC (~midnight US Pacific)
   schedule:
-    - cron: '0 8 * * *'
+    - cron: '0 22 * * 0'
+      timezone: 'America/New_York'
   # allow manual trigger from the Actions tab
   workflow_dispatch:
 
