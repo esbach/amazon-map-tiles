@@ -22,7 +22,7 @@ while (true) {
 
   const { data, error } = await supabase
     .from(table)
-    .select('id, properties, geometry_geojson')
+    .select('id, area_type, area_class, geometry')
     .order('id', { ascending: true })
     .range(from, to);
 
@@ -55,15 +55,13 @@ const dedupedRows = Array.from(byId.values());
 console.log(`Fetched ${allRows.length} rows, ${dedupedRows.length} unique ids from Supabase`);
 
 const features = dedupedRows.map(row => {
-  const p = row.properties || {};
   return {
     type: 'Feature',
-    geometry: row.geometry_geojson,
+    geometry: row.geometry,
     properties: {
       id: row.id,
-      area_class: p.area_class ?? null,
-      area_type: p.area_type ?? null,
-      name: p.name ?? null
+      area_class: row.area_class ?? null,
+      area_type: row.area_type ?? null
     }
   };
 });
