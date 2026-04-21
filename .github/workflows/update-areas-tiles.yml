@@ -42,6 +42,19 @@ jobs:
       - name: Build tiles with Tippecanoe
         run: npm run build-tiles
 
+      - name: Debug tile outputs
+        run: |
+          echo "=== Tool versions ==="
+          tippecanoe --version || true
+          echo "=== Output files ==="
+          ls -lh areas/areas.geojson areas/areas.pmtiles
+          echo "=== File hashes ==="
+          sha256sum areas/areas.geojson areas/areas.pmtiles
+          echo "=== Git status ==="
+          git status --short
+          echo "=== GeoJSON diff (first 40 lines) ==="
+          git diff -- areas/areas.geojson | head -n 40 || true
+
       - name: Commit and push if there are changes
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
