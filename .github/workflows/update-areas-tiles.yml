@@ -1,0 +1,61 @@
+name: Update areas tiles from Supabase
+
+on:
+  # run once per day at 08:00 UTC (~midnight US Pacific)
+  schedule:
+    - cron: '0 8 * * *'
+  # allow manual trigger from the Actions tab
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repo
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Install Node dependencies
+        run: npm install
+
+      - name: Install Tippecanoe
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install tippecanoe
+
+      - name: Fetch GeoJSON from Supabase
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          SUPABASE_TABLE: ${{ secrets.SUPABASE_TABLE }}
+        run: npm run fetch-geojson
+
+      - name: Build tiles with Tippecanoe
+        run: npm run build-tiles
+
+      - name: Debug tile outputs
+        run: |
+          echo "=== Tool versions ==="
+          tippecanoe --version || true
+          echo "=== Output files ==="
+          ls -lh areas/areas.geojson areas/areas.pmtiles
+          echo "=== File hashes ==="
+          sha256sum areas/areas.geojson areas/areas.pmtiles
+
+      # Tiles are deployed straight to Netlify, not committed to git.
+      # Supabase is the source of truth for area history; this repo only
+      # ever needs to hold the current build, so we avoid growing repo
+      # history with large binary diffs on every data change.
+      - name: Deploy tiles to Netlify
+        env:
+          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+          NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
+        run: npm run deploy

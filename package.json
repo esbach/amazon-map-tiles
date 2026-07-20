@@ -1,0 +1,16 @@
+{
+  "name": "tiles-pipeline",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "fetch-geojson": "node scripts/fetch-areas-geojson.mjs",
+    "build-tiles": "bash scripts/generate-tiles.sh",
+    "deploy": "bash scripts/deploy-netlify.sh"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.86.0"
+  },
+  "devDependencies": {
+    "netlify-cli": "^26.2.0"
+  }
+}

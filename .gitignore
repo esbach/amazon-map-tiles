@@ -1,0 +1,8 @@
+node_modules/
+.DS_Store
+
+# Generated each run from Supabase — history lives in Postgres, not git.
+# Deployed directly to Netlify by CI; never committed.
+areas/areas.geojson
+areas/areas.pmtiles
+dist/
