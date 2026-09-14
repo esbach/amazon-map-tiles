@@ -22,7 +22,7 @@ while (true) {
 
   const { data, error } = await supabase
     .from(table)
-    .select('id, area_type, area_class, geometry')
+    .select('id, area_type, area_class, country, geometry')
     .order('id', { ascending: true })
     .range(from, to);
 
@@ -61,7 +61,8 @@ const features = dedupedRows.map(row => {
     properties: {
       id: row.id,
       area_class: row.area_class ?? null,
-      area_type: row.area_type ?? null
+      area_type: row.area_type ?? null,
+      country: row.country ?? null
     }
   };
 });

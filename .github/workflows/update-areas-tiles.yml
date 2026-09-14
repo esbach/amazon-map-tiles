@@ -49,6 +49,8 @@ jobs:
           ls -lh areas/areas.geojson areas/areas.pmtiles
           echo "=== File hashes ==="
           sha256sum areas/areas.geojson areas/areas.pmtiles
+          echo "=== Tile attributes ==="
+          python -c "import json,sys; d=json.load(open('areas/areas.geojson')); print(sorted(d['features'][0]['properties'].keys()))"
 
       # Tiles are deployed straight to Netlify, not committed to git.
       # Supabase is the source of truth for area history; this repo only

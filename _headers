@@ -1,4 +1,25 @@
+# Content-addressed tiles. The hash is in the filename, so a given URL can
+# never change contents and the CDN may keep it forever. This is the path the
+# app reads (via version.json) — it makes every PMTiles range request a plain
+# edge cache hit instead of an origin revalidation.
+/tiles/*
+  Content-Type: application/octet-stream
+  Access-Control-Allow-Origin: *
+  Access-Control-Allow-Methods: GET, HEAD, OPTIONS
+  Access-Control-Allow-Headers: *
+  Cache-Control: public, max-age=31536000, immutable
 
+# Maps tile names to their current content-addressed URLs. The only file
+# clients need to re-check, and small enough that revalidating it is cheap.
+/version.json
+  Access-Control-Allow-Origin: *
+  Access-Control-Allow-Methods: GET, HEAD, OPTIONS
+  Access-Control-Allow-Headers: *
+  Cache-Control: public, max-age=60, must-revalidate
+
+# Legacy fixed paths, kept for clients that predate version.json. These URLs
+# are overwritten in place on every run, so they cannot be cached and each
+# range request pays an origin revalidation.
 /areas/*.pmtiles
   Content-Type: application/octet-stream
   Access-Control-Allow-Origin: *
@@ -8,7 +29,7 @@
   Content-Type: application/octet-stream
   Access-Control-Allow-Origin: *
   Cache-Control: public, max-age=0, must-revalidate
-  
+
 # Enable CORS for all tile files in ecuador_v1
 /ecuador/*
   Access-Control-Allow-Origin: *
@@ -30,17 +51,9 @@
   Access-Control-Allow-Headers: *
   Cache-Control: public, max-age=3600
 
-# Also enable CORS for the tiles subdirectory (if it exists)
-/tiles/*
-  Access-Control-Allow-Origin: *
-  Access-Control-Allow-Methods: GET, HEAD, OPTIONS
-  Access-Control-Allow-Headers: *
-  Cache-Control: public, max-age=31536000, immutable
-
 # General CORS for the entire site
 /*
   X-Frame-Options: DENY
   X-XSS-Protection: 1; mode=block
   X-Content-Type-Options: nosniff
   Referrer-Policy: strict-origin-when-cross-origin
-

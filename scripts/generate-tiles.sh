@@ -23,6 +23,7 @@ tippecanoe \
   --include=id \
   --include=area_type \
   --include=area_class \
+  --include=country \
   "$INPUT"
 
 echo "Tiles written to $OUTPUT_PM"
