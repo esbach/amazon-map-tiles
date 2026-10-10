@@ -22,12 +22,15 @@ build() {
     exit 1
   fi
 
+  # No --use-attribute-for-id: our ids are text ("AA-ECU-0689"), and an MVT
+  # feature id has to be an integer, so tippecanoe only warned and ignored it.
+  # The website gets the same result from promoteId, which promotes the id
+  # property to the feature id when the source loads.
   tippecanoe \
     -o "$output" \
     -l "$layer" \
     --force \
     -zg \
-    --use-attribute-for-id=id \
     --include=id \
     --include=area_type \
     --include=area_class \
