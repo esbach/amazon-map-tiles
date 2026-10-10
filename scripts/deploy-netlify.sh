@@ -13,6 +13,9 @@ mkdir -p "$DIST_DIR/areas" "$DIST_DIR/limits"
 
 cp _headers "$DIST_DIR/_headers"
 cp areas/areas.pmtiles "$DIST_DIR/areas/areas.pmtiles"
+# The complementary instruments ship as their own archive so the website can
+# leave them unfetched until a reader asks for them.
+cp areas/complementary.pmtiles "$DIST_DIR/areas/complementary.pmtiles"
 cp limits/limits.pmtiles "$DIST_DIR/limits/limits.pmtiles"
 
 echo "=== Deploying $DIST_DIR to Netlify ==="
