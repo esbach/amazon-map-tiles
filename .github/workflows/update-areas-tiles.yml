@@ -46,11 +46,15 @@ jobs:
           echo "=== Tool versions ==="
           tippecanoe --version || true
           echo "=== Output files ==="
-          ls -lh areas/areas.geojson areas/areas.pmtiles
+          ls -lh areas/areas.geojson areas/areas.pmtiles \
+                 areas/complementary.geojson areas/complementary.pmtiles
           echo "=== File hashes ==="
-          sha256sum areas/areas.geojson areas/areas.pmtiles
+          sha256sum areas/areas.geojson areas/areas.pmtiles \
+                    areas/complementary.geojson areas/complementary.pmtiles
           echo "=== Tile attributes ==="
-          python -c "import json,sys; d=json.load(open('areas/areas.geojson')); print(sorted(d['features'][0]['properties'].keys()))"
+          for f in areas/areas.geojson areas/complementary.geojson; do
+            python -c "import json,sys; d=json.load(open('$f')); print('$f', len(d['features']), sorted(d['features'][0]['properties'].keys()))"
+          done
 
       # Tiles are deployed straight to Netlify, not committed to git.
       # Supabase is the source of truth for area history; this repo only
