@@ -50,39 +50,83 @@ for (const name of names) {
 
 const supabase = createClient(supabaseUrl, supabaseKey);
 
-async function fetchDataset({ view, out, columns }) {
-  const select = [...columns, 'geometry'].join(', ');
+// A page carries full-resolution geometry, so it is big: 250 rows is roughly
+// 15 MB of JSON. Larger pages are what made this step fragile - a 1000-row page
+// was ~60 MB and took ~25 s to come back, long enough for Supabase's gateway to
+// drop the connection now and then (Cloudflare 520/521).
+const PAGE_SIZE = 250;
 
-  // Fetch in pages of 1000 rows with a stable order
-  const pageSize = 1000;
-  let from = 0;
-  let allRows = [];
+// Waits between attempts at one page. A gateway blip or a statement timeout is
+// usually gone within a minute or two, and a failed run otherwise leaves the
+// map stale until somebody notices, so it is worth waiting a few minutes.
+const RETRY_DELAYS_MS = [5_000, 15_000, 30_000, 60_000, 120_000];
 
-  while (true) {
-    const to = from + pageSize - 1;
+const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
 
-    const { data, error } = await supabase
-      .from(view)
-      .select(select)
-      .order('id', { ascending: true })
-      .range(from, to);
+// Supabase's gateway answers a failed request with a whole Cloudflare HTML
+// page, which supabase-js hands back as the error message. Keep the log to the
+// page's title instead of two hundred lines of markup.
+function describeError(error) {
+  const message = String(error?.message ?? error);
+  const title = message.match(/<title>([^<]*)<\/title>/i);
+  const summary = title ? title[1].trim() : message.slice(0, 300);
+  return error?.code ? `${error.code}: ${summary}` : summary;
+}
 
-    if (error) {
-      console.error(`Error querying ${view}:`, error);
+// One page, keyed on the last id of the page before it rather than on an
+// offset. With an offset Postgres still converts every skipped row's geometry
+// to GeoJSON before discarding it, so each page cost more than the one before
+// and the last ones ran closest to the statement timeout.
+async function fetchPage(view, select, afterId) {
+  for (let attempt = 0; ; attempt++) {
+    let error;
+    try {
+      let query = supabase
+        .from(view)
+        .select(select)
+        .order('id', { ascending: true })
+        .limit(PAGE_SIZE);
+      if (afterId != null) query = query.gt('id', afterId);
+
+      const result = await query;
+      if (!result.error) return result.data ?? [];
+      error = result.error;
+    } catch (thrown) {
+      error = thrown;
+    }
+
+    const where = afterId == null ? 'first page' : `page after ${afterId}`;
+    if (attempt >= RETRY_DELAYS_MS.length) {
+      console.error(`Error querying ${view} (${where}), giving up after ${attempt + 1} attempts: ${describeError(error)}`);
       process.exit(1);
     }
 
-    if (!data || data.length === 0) {
+    const delay = RETRY_DELAYS_MS[attempt];
+    console.warn(`${view} (${where}) failed: ${describeError(error)} - retrying in ${delay / 1000}s`);
+    await sleep(delay);
+  }
+}
+
+async function fetchDataset({ view, out, columns }) {
+  const select = [...columns, 'geometry'].join(', ');
+
+  let afterId = null;
+  let allRows = [];
+
+  while (true) {
+    const data = await fetchPage(view, select, afterId);
+
+    if (data.length === 0) {
       break; // no more rows
     }
 
     allRows.push(...data);
 
-    if (data.length < pageSize) {
+    if (data.length < PAGE_SIZE) {
       break; // last page
     }
 
-    from += pageSize;
+    afterId = data[data.length - 1].id;
   }
 
   // 🔹 Deduplicate by id just in case
